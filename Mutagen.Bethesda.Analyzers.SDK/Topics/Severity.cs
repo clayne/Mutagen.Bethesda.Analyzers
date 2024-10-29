@@ -2,7 +2,7 @@
 
 public enum Severity : byte
 {
-    Silent = 0,
+    None = 0,
     Suggestion = 1,
     Warning = 2,
     Error = 3,
@@ -15,7 +15,7 @@ public static class SeverityExt
     {
         return sev switch
         {
-            Severity.Silent => "SIL",
+            Severity.None => "SIL",
             Severity.Suggestion => "SUG",
             Severity.Warning => "WAR",
             Severity.Error => "ERR",
