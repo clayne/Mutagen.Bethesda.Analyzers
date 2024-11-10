@@ -1,6 +1,7 @@
 using Autofac;
 using FluentAssertions;
-using Mutagen.Bethesda.Analyzers.Config;
+using Mutagen.Bethesda.Analyzers.Config.Analyzer;
+using Mutagen.Bethesda.Analyzers.Config.Topic;
 using Mutagen.Bethesda.Analyzers.Engines;
 using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;

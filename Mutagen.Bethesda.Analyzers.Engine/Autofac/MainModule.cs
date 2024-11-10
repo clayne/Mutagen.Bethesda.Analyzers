@@ -18,7 +18,7 @@ public class MainModule : Module
         builder.RegisterAssemblyTypes(typeof(IsolatedEngine).Assembly)
             .InNamespacesOf(
                 typeof(ContextualEngine),
-                typeof(AnalyzerConfig))
+                typeof(ConfigReader<>))
             .AsImplementedInterfaces()
             .AsSelf()
             .SingleInstance();
@@ -28,5 +28,7 @@ public class MainModule : Module
         builder.RegisterGeneric(typeof(InjectionDriverProvider<>))
             .As(typeof(IDriverProvider<>))
             .SingleInstance();
+        builder.RegisterGeneric(typeof(ConfigReader<>))
+            .As(typeof(ConfigReader<>));
     }
 }

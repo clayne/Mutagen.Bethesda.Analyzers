@@ -2,6 +2,7 @@
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Order;
 using Mutagen.Bethesda.Plugins.Order.DI;
+
 namespace Mutagen.Bethesda.Analyzers.Cli.Overrides;
 
 public class DataDirectoryEnabledPluginListingsProvider(IDataDirectoryProvider dataDirectoryProvider) : IEnabledPluginListingsProvider

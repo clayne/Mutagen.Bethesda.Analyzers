@@ -1,4 +1,4 @@
-﻿using Mutagen.Bethesda.Analyzers.Config;
+﻿using Mutagen.Bethesda.Analyzers.Config.Topic;
 using Mutagen.Bethesda.Analyzers.SDK.Drops;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Plugins;

@@ -3,9 +3,11 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Mutagen.Bethesda.Analyzers.Autofac;
 using Mutagen.Bethesda.Analyzers.Cli.Args;
 using Mutagen.Bethesda.Analyzers.Cli.Modules;
 using Mutagen.Bethesda.Analyzers.Cli.Overrides;
+using Mutagen.Bethesda.Analyzers.Config.Analyzer;
 using Mutagen.Bethesda.Analyzers.Engines;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
@@ -15,7 +17,6 @@ using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using Noggog.StructuredStrings;
 using Noggog.WorkEngine;
-using IContainer = Autofac.IContainer;
 
 namespace Mutagen.Bethesda.Analyzers.Cli;
 
@@ -23,10 +24,10 @@ public static class RunAnalyzers
 {
     public static async Task<int> Run(RunAnalyzersCommand command)
     {
-        var container = GetContainer(command);
+        var lifetimeScope = GetContainer(command);
 
-        var engine = container.Resolve<ContextualEngine>();
-        var consumer = container.Resolve<IWorkConsumer>();
+        var engine = lifetimeScope.Resolve<ContextualEngine>();
+        var consumer = lifetimeScope.Resolve<IWorkConsumer>();
 
         PrintTopics(command, engine);
 
@@ -59,7 +60,7 @@ public static class RunAnalyzers
         Console.WriteLine();
     }
 
-    private static IContainer GetContainer(RunAnalyzersCommand command)
+    private static ILifetimeScope GetContainer(RunAnalyzersCommand command)
     {
         var services = new ServiceCollection();
         services.AddLogging(x => x.AddConsole());
@@ -90,6 +91,44 @@ public static class RunAnalyzers
 
         builder.RegisterModule<SkyrimAnalyzerModule>();
 
-        return builder.Build();
+        var container = builder.Build();
+
+        var lifetimeScope = container.Resolve<ILifetimeScope>();
+        return lifetimeScope.BeginLifetimeScope(b =>
+        {
+            var analyzerConfigProvider = container.Resolve<AnalyzerConfigProvider>();
+            var analyzerConfig = analyzerConfigProvider.Config;
+
+            if (analyzerConfig.DataDirectoryPath.HasValue)
+            {
+                var dataDirectoryProvider = new DataDirectoryInjection(analyzerConfig.DataDirectoryPath.Value);
+                b.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
+            }
+
+            if (analyzerConfig.LoadOrderSetByDataDirectory)
+            {
+                b.RegisterType<DataDirectoryEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
+                b.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
+                b.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
+            }
+            else if (analyzerConfig.LoadOrderSetToMods is not null)
+            {
+                b.RegisterType<InjectedEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
+                b.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
+                b.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
+            }
+
+            if (analyzerConfig.GameRelease.HasValue)
+            {
+                var gameReleaseInjection = new GameReleaseInjection(analyzerConfig.GameRelease.Value);
+                b.RegisterInstance(gameReleaseInjection).AsImplementedInterfaces();
+            }
+
+            if (analyzerConfig.OutputFilePath is not null)
+            {
+                b.RegisterType<CsvReportHandler>().AsImplementedInterfaces();
+                b.RegisterInstance(new CsvInputs(analyzerConfig.OutputFilePath)).AsSelf().AsImplementedInterfaces();
+            }
+        });
     }
 }
