@@ -16,7 +16,7 @@ public static class CellExtensions
         }
 
         // Get world locations
-        if ((cell.Flags & Cell.Flag.IsInteriorCell) == 0)
+        if (!cell.Flags.HasFlag(Cell.Flag.IsInteriorCell))
         {
             var context = linkCache.ResolveSimpleContext<ICellGetter>(cell.FormKey);
             var world = (IWorldspaceGetter?)context.Parent?.Record;
