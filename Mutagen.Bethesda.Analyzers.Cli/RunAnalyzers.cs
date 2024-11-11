@@ -3,7 +3,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mutagen.Bethesda.Analyzers.Autofac;
 using Mutagen.Bethesda.Analyzers.Cli.Args;
 using Mutagen.Bethesda.Analyzers.Cli.Modules;
 using Mutagen.Bethesda.Analyzers.Cli.Overrides;
@@ -93,8 +92,7 @@ public static class RunAnalyzers
 
         var container = builder.Build();
 
-        var lifetimeScope = container.Resolve<ILifetimeScope>();
-        return lifetimeScope.BeginLifetimeScope(b =>
+        return container.BeginLifetimeScope(b =>
         {
             var analyzerConfigProvider = container.Resolve<AnalyzerConfigProvider>();
             var analyzerConfig = analyzerConfigProvider.Config;
