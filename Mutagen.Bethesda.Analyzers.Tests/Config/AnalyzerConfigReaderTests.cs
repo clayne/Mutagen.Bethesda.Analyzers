@@ -59,8 +59,8 @@ public class AnalyzerConfigReaderTests
     }
 
     [Theory]
-    [AnalyzerInlineData("environment.output_file = C:/some/path")]
-    [AnalyzerInlineData(@"environment.output_file = C:\some\path")]
+    [AnalyzerInlineData("output_file = C:/some/path")]
+    [AnalyzerInlineData(@"output_file = C:\some\path")]
     public void TestOutputFilePath(
         string line,
         IAnalyzerConfig config,

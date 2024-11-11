@@ -105,11 +105,10 @@ public class AnalyzerConfigReader : IConfigReader<IAnalyzerConfig>
 
     private bool ProcessOutputFilePath(IAnalyzerConfig config, IReadOnlyList<string> instructions, string value)
     {
-        // environment.output_file = <path>
-        if (instructions.Count != 2) return false;
+        // output_file = <path>
+        if (instructions.Count != 1) return false;
 
-        if (instructions[0] is not EnvironmentGroup) return false;
-        if (instructions[1] is not "output_file") return false;
+        if (instructions[0] is not "output_file") return false;
 
         config.OverrideOutputFilePath(value);
 
