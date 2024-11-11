@@ -111,7 +111,7 @@ public static class RunAnalyzers
             }
             else if (analyzerConfig.LoadOrderSetToMods is not null)
             {
-                b.RegisterType<InjectedEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
+                b.RegisterInstance(new InjectedEnabledPluginListingsProvider(analyzerConfig.LoadOrderSetToMods)).As<IEnabledPluginListingsProvider>();
                 b.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
                 b.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
             }
