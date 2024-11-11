@@ -83,6 +83,5 @@ public class AnalyzerAutoDataCustomization : ICustomization
         fixture.Customize(new MutagenReleaseCustomization(GameRelease.SkyrimSE));
         fixture.Customize(new DefaultCustomization(_targetFileSystem));
         fixture.Customizations.Add(new TopicPrefixBuilder());
-        fixture.Customizations.Add(new NullLoggerBuilder());
     }
 }
