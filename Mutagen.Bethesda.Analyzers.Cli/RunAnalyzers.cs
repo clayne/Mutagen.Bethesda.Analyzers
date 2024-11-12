@@ -127,6 +127,10 @@ public static class RunAnalyzers
                 b.RegisterType<CsvReportHandler>().AsImplementedInterfaces();
                 b.RegisterInstance(new CsvInputs(analyzerConfig.OutputFilePath)).AsSelf().AsImplementedInterfaces();
             }
+
+            b.RegisterType<ContextualEngine>()
+                .AsSelf()
+                .AsImplementedInterfaces();
         });
     }
 }
