@@ -10,12 +10,6 @@ public interface IAnalyzerConfigLookup
     public IEnumerable<ModKey>? LoadOrderSetToMods { get; }
     GameRelease? GameRelease { get; }
     public FilePath? OutputFilePath { get; }
-
-    void OverrideDataDirectory(DirectoryPath path);
-    void OverrideLoadOrderSetByDataDirectory(bool value);
-    void OverrideGameRelease(GameRelease release);
-    void OverrideOutputFilePath(FilePath filePath);
-    void OverrideLoadOrderSetToMods(IEnumerable<ModKey> mods);
 }
 
 public interface IAnalyzerConfig : IAnalyzerConfigLookup
