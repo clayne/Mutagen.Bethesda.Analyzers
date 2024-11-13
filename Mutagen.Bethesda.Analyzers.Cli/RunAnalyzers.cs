@@ -5,14 +5,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda.Analyzers.Cli.Args;
 using Mutagen.Bethesda.Analyzers.Cli.Modules;
-using Mutagen.Bethesda.Analyzers.Cli.Overrides;
-using Mutagen.Bethesda.Analyzers.Config.Analyzer;
 using Mutagen.Bethesda.Analyzers.Engines;
-using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Analyzers.Skyrim;
-using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using Noggog.StructuredStrings;
 using Noggog.WorkEngine;
@@ -23,10 +18,10 @@ public static class RunAnalyzers
 {
     public static async Task<int> Run(RunAnalyzersCommand command)
     {
-        var lifetimeScope = GetContainer(command);
+        var container = GetContainer(command);
 
-        var engine = lifetimeScope.Resolve<ContextualEngine>();
-        var consumer = lifetimeScope.Resolve<IWorkConsumer>();
+        var engine = container.Resolve<ContextualEngine>();
+        var consumer = container.Resolve<IWorkConsumer>();
 
         PrintTopics(command, engine);
 
@@ -59,78 +54,21 @@ public static class RunAnalyzers
         Console.WriteLine();
     }
 
-    private static ILifetimeScope GetContainer(RunAnalyzersCommand command)
+    private static IContainer GetContainer(RunAnalyzersCommand command)
     {
         var services = new ServiceCollection();
         services.AddLogging(x => x.AddConsole());
 
         var builder = new ContainerBuilder();
         builder.Populate(services);
-        builder.RegisterInstance(new FileSystem())
-            .As<IFileSystem>();
-        builder.RegisterModule(new RunAnalyzerModule(command));
-        builder.RegisterInstance(new GameReleaseInjection(command.GameRelease))
-            .AsImplementedInterfaces();
-        builder.RegisterType<ConsoleReportHandler>().AsImplementedInterfaces();
-        builder.RegisterInstance(command).AsImplementedInterfaces();
-        builder.RegisterInstance(new NumWorkThreadsConstant(command.NumThreads)).AsImplementedInterfaces();
+        builder.RegisterInstance(new FileSystem()).As<IFileSystem>();
 
-        if (command.CustomDataFolder is not null)
-        {
-            var dataDirectoryProvider = new DataDirectoryInjection(command.CustomDataFolder);
-            builder.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
-        }
-
-        if (command.UseDataFolderForLoadOrder)
-        {
-            builder.RegisterType<DataDirectoryEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
-            builder.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
-            builder.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
-        }
+        builder.RegisterModule<RunAnalyzerModule>();
+        builder.RegisterModule(new AnalyzerCommandModule(command));
+        builder.RegisterModule(new AnalyzerConfigModule(command.GameRelease));
 
         builder.RegisterModule<SkyrimAnalyzerModule>();
 
-        var container = builder.Build();
-
-        return container.BeginLifetimeScope(b =>
-        {
-            var analyzerConfigProvider = container.Resolve<AnalyzerConfigProvider>();
-            var analyzerConfig = analyzerConfigProvider.Config;
-
-            if (analyzerConfig.DataDirectoryPath.HasValue)
-            {
-                var dataDirectoryProvider = new DataDirectoryInjection(analyzerConfig.DataDirectoryPath.Value);
-                b.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
-            }
-
-            if (analyzerConfig.LoadOrderSetByDataDirectory)
-            {
-                b.RegisterType<DataDirectoryEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
-                b.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
-                b.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
-            }
-            else if (analyzerConfig.LoadOrderSetToMods is not null)
-            {
-                b.RegisterInstance(new InjectedEnabledPluginListingsProvider(analyzerConfig.LoadOrderSetToMods)).As<IEnabledPluginListingsProvider>();
-                b.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
-                b.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
-            }
-
-            if (analyzerConfig.GameRelease.HasValue)
-            {
-                var gameReleaseInjection = new GameReleaseInjection(analyzerConfig.GameRelease.Value);
-                b.RegisterInstance(gameReleaseInjection).AsImplementedInterfaces();
-            }
-
-            if (analyzerConfig.OutputFilePath is not null)
-            {
-                b.RegisterType<CsvReportHandler>().AsImplementedInterfaces();
-                b.RegisterInstance(new CsvInputs(analyzerConfig.OutputFilePath)).AsSelf().AsImplementedInterfaces();
-            }
-
-            b.RegisterType<ContextualEngine>()
-                .AsSelf()
-                .AsImplementedInterfaces();
-        });
+        return builder.Build();
     }
 }
