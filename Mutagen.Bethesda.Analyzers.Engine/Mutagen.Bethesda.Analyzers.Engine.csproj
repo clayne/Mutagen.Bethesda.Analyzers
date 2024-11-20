@@ -13,9 +13,4 @@
       <PackageReference Include="Mutagen.Bethesda.Autofac" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Config\AnalyzerConfigProvider.cs" />
-      <Compile Remove="Config\AnalyzerConfigReader.cs" />
-    </ItemGroup>
-
 </Project>
