@@ -25,7 +25,7 @@ public class NoMerchantChestLocRefTypeAnalyzer : IContextualRecordAnalyzer<ICell
         var merchantChests = param.LinkCache.PriorityOrder.WinningOverrides<IFactionGetter>()
             .Where(faction => faction.Flags.HasFlag(Bethesda.Skyrim.Faction.FactionFlag.Vendor))
             .Select(faction => faction.MerchantContainer.FormKey)
-            .ToList();
+            .ToHashSet();
 
         // Skip non-settlement cells
         if (!cell.IsSettlementCell(param.LinkCache)) return;
