@@ -1,11 +1,25 @@
-﻿using Mutagen.Bethesda.Analyzers.Config.Analyzer;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Mutagen.Bethesda.Analyzers.Config;
+using Mutagen.Bethesda.Analyzers.Config.Analyzer;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
-using Mutagen.Bethesda.Plugins;
-using Noggog;
 using NSubstitute;
 using Xunit;
 
 namespace Mutagen.Bethesda.Analyzers.Tests.Config;
+
+[method: SuppressMessage("ReSharper", "ContextualLoggerProblem", Justification = "Passed in")]
+public class AnalyzerConfigReader(
+    ILogger<ConfigReader<IAnalyzerConfig>> logger,
+    ProcessDataDirectoryPath p1,
+    ProcessGameRelease p2,
+    ProcessLoadOrderSetByDataDirectory p3,
+    ProcessLoadOrderSetToMods p4,
+    ProcessOutputFilePath p5)
+{
+    public readonly ConfigReader<IAnalyzerConfig> Reader = new(logger, [p1, p2, p3, p4, p5]);
+}
 
 public class AnalyzerConfigReaderTests
 {
@@ -14,11 +28,12 @@ public class AnalyzerConfigReaderTests
     [AnalyzerInlineData(@"environment.data_directory = C:\some\path")]
     public void TestDataDirectory(
         string line,
-        IAnalyzerConfig config,
+        AnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
-        config.Received(1).OverrideDataDirectory("C:/some/path");
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.DataDirectoryPath.Should().NotBeNull();
+        config.DataDirectoryPath!.Value.Path.Should().Be(@"C:\some\path");
     }
 
     [Theory]
@@ -29,7 +44,7 @@ public class AnalyzerConfigReaderTests
         IAnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
+        sut.Reader.ReadInto(line.AsSpan(), config);
         config.Received(1).OverrideLoadOrderSetByDataDirectory(Arg.Any<bool>());
     }
 
@@ -37,12 +52,11 @@ public class AnalyzerConfigReaderTests
     [AnalyzerInlineData("environment.load_order.set_to_mods = Skyrim.esm, Update.esm")]
     public void TestSetToMods(
         string line,
-        IAnalyzerConfig config,
+        AnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
-        List<ModKey> modKeys = [FormKeys.SkyrimSE.Skyrim.ModKey, Update.ModKey];
-        config.Received(1).OverrideLoadOrderSetToMods(Arg.Is<List<ModKey>>(list => list.SequenceEqual(modKeys)));
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.LoadOrderSetToMods.Should().BeEquivalentTo([FormKeys.SkyrimSE.Skyrim.ModKey, Update.ModKey]);
     }
 
     [Theory]
@@ -54,7 +68,7 @@ public class AnalyzerConfigReaderTests
         IAnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
+        sut.Reader.ReadInto(line.AsSpan(), config);
         config.Received(1).OverrideGameRelease(Arg.Any<GameRelease>());
     }
 
@@ -63,10 +77,11 @@ public class AnalyzerConfigReaderTests
     [AnalyzerInlineData(@"output_file = C:\some\path")]
     public void TestOutputFilePath(
         string line,
-        IAnalyzerConfig config,
+        AnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
-        config.Received(1).OverrideOutputFilePath(Arg.Any<FilePath>());
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.OutputFilePath.Should().NotBeNull();
+        config.OutputFilePath!.Value.Path.Should().Be(@"C:\some\path");
     }
 }

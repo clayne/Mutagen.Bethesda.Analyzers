@@ -1,22 +1,35 @@
-﻿using Mutagen.Bethesda.Analyzers.Config.Topic;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Mutagen.Bethesda.Analyzers.Config;
+using Mutagen.Bethesda.Analyzers.Config.Topic;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
-using NSubstitute;
 using Xunit;
 
 namespace Mutagen.Bethesda.Analyzers.Tests.Config;
 
+[method: SuppressMessage("ReSharper", "ContextualLoggerProblem", Justification = "Passed in")]
+public class TopicConfigReader(
+    ILogger<ConfigReader<ITopicConfig>> logger,
+    ProcessSeverity p1)
+{
+    public readonly ConfigReader<ITopicConfig> Reader = new(logger, [p1]);
+}
+
 public class TopicConfigReaderTests
 {
+    private readonly TopicDefinition _topicDefinition = new(new TopicId("A", 123), "", Severity.None);
+
     [Theory]
     [AnalyzerInlineData("diagnostic.A123.severity = Warning")]
     [AnalyzerInlineData("diagnostic.A123.severity = Warning # A Comment")]
     public void TestSeverity(
         string line,
-        ITopicConfig config,
+        TopicConfig config,
         TopicConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
-        config.Received(1).Override(new TopicId("A", 123), Severity.Warning);
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.LookupSeverity(_topicDefinition).Should().Be(Severity.Warning);
     }
 
     [Theory]
@@ -31,10 +44,10 @@ public class TopicConfigReaderTests
     [AnalyzerInlineData("#diagnostic.A123.severity = Warning")]
     public void AbnormalLinesDontOverride(
         string line,
-        ITopicConfig config,
+        TopicConfig config,
         TopicConfigReader sut)
     {
-        sut.ReadInto(line.AsSpan(), config);
-        config.DidNotReceiveWithAnyArgs().Override(default!, default);
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.LookupSeverity(_topicDefinition).Should().Be(Severity.None);
     }
 }
