@@ -33,7 +33,7 @@ public class AnalyzerConfigReaderTests
     {
         sut.Reader.ReadInto(line.AsSpan(), config);
         config.DataDirectoryPath.Should().NotBeNull();
-        config.DataDirectoryPath!.Value.Path.Should().Be(@"C:\some\path");
+        config.DataDirectoryPath!.Value.Path.Should().Be(Path.Combine("C:", "some", "path"));
     }
 
     [Theory]
@@ -82,6 +82,6 @@ public class AnalyzerConfigReaderTests
     {
         sut.Reader.ReadInto(line.AsSpan(), config);
         config.OutputFilePath.Should().NotBeNull();
-        config.OutputFilePath!.Value.Path.Should().Be(@"C:\some\path");
+        config.OutputFilePath!.Value.Path.Should().Be(Path.Combine("C:", "some", "path"));
     }
 }
