@@ -3,29 +3,18 @@ using Noggog;
 
 namespace Mutagen.Bethesda.Analyzers.Config.Analyzer;
 
-public class AnalyzerConfigBuilder
+public class AnalyzerConfigBuilder(
+    IFileSystem fileSystem,
+    ConfigDirectoryProvider configDirectoryProvider,
+    ConfigReader<IAnalyzerConfig> reader)
 {
     public const string AnalyzerFileName = ".analyzerconfig";
-
-    private readonly IFileSystem _fileSystem;
-    private readonly ConfigDirectoryProvider _configDirectoryProvider;
-    private readonly AnalyzerConfigReader _reader;
-
-    public AnalyzerConfigBuilder(
-        IFileSystem fileSystem,
-        ConfigDirectoryProvider configDirectoryProvider,
-        AnalyzerConfigReader reader)
-    {
-        _fileSystem = fileSystem;
-        _configDirectoryProvider = configDirectoryProvider;
-        _reader = reader;
-    }
 
     public IAnalyzerConfigLookup Build()
     {
         var config = new AnalyzerConfig();
 
-        foreach (var configDirectory in _configDirectoryProvider.ConfigDirectories)
+        foreach (var configDirectory in configDirectoryProvider.ConfigDirectories)
         {
             LoadIn(Path.Combine(configDirectory.Path, AnalyzerFileName), config);
         }
@@ -35,8 +24,8 @@ public class AnalyzerConfigBuilder
 
     private void LoadIn(FilePath path, AnalyzerConfig config)
     {
-        if (!path.CheckExists(_fileSystem)) return;
+        if (!path.CheckExists(fileSystem)) return;
 
-        _reader.ReadInto(path, config);
+        reader.ReadInto(path, config);
     }
 }

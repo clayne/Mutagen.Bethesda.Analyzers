@@ -9,12 +9,12 @@ public class TopicConfigBuilder
 
     private readonly IFileSystem _fileSystem;
     private readonly ConfigDirectoryProvider _configDirectoryProvider;
-    private readonly TopicConfigReader _reader;
+    private readonly ConfigReader<ITopicConfig> _reader;
 
     public TopicConfigBuilder(
         IFileSystem fileSystem,
         ConfigDirectoryProvider configDirectoryProvider,
-        TopicConfigReader reader)
+        ConfigReader<ITopicConfig> reader)
     {
         _fileSystem = fileSystem;
         _configDirectoryProvider = configDirectoryProvider;

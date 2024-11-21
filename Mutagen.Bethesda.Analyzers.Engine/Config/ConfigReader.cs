@@ -3,25 +3,13 @@ using Noggog;
 
 namespace Mutagen.Bethesda.Analyzers.Config;
 
-public class ConfigReader<TConfig> : IConfigReader<TConfig> where TConfig : class
+public class ConfigReader<TConfig>(
+    ILogger<ConfigReader<TConfig>> logger,
+    IConfigReaderProcessor<TConfig>[] processors)
+    : IConfigReader<TConfig>
+    where TConfig : class
 {
     public const string SettingEqualString = " = ";
-
-    private readonly ILogger<ConfigReader<TConfig>> _logger;
-    private readonly List<Func<TConfig, IReadOnlyList<string>, string, bool>> _processors = [];
-
-    public ConfigReader(ILogger<ConfigReader<TConfig>> logger)
-    {
-        _logger = logger;
-    }
-
-    public ConfigReader<TConfig> Register(Func<TConfig, IReadOnlyList<string>, string, bool> process)
-    {
-        var configReader = new ConfigReader<TConfig>(_logger);
-        configReader._processors.AddRange(_processors);
-        configReader._processors.Add(process);
-        return configReader;
-    }
 
     public void ReadInto(FilePath path, TConfig config)
     {
@@ -52,13 +40,13 @@ public class ConfigReader<TConfig> : IConfigReader<TConfig> where TConfig : clas
 
             if (split != 2)
             {
-                _logger.LogError("Malformed line: {Line}", line.ToString());
+                logger.LogError("Malformed line: {Line}", line.ToString());
                 return;
             }
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Malformed line: {Line}", line.ToString());
+            logger.LogError(e, "Malformed line: {Line}", line.ToString());
             return;
         }
 
@@ -73,9 +61,9 @@ public class ConfigReader<TConfig> : IConfigReader<TConfig> where TConfig : clas
         var value = line[ranges[1]].Trim().ToString();
 
         // Pass result into processors
-        foreach (var processor in _processors)
+        foreach (var processor in processors)
         {
-            if (processor(config, instructionPartStrings, value)) return;
+            if (processor.Process(config, instructionPartStrings, value)) return;
         }
     }
 }
