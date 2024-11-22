@@ -22,12 +22,18 @@ public class NoMerchantChestLocRefTypeAnalyzer : IContextualRecordAnalyzer<ICell
     {
         var cell = param.Record;
 
+        var merchantChests = param.LinkCache.PriorityOrder.WinningOverrides<IFactionGetter>()
+            .Where(faction => faction.Flags.HasFlag(Bethesda.Skyrim.Faction.FactionFlag.Vendor))
+            .Select(faction => faction.MerchantContainer.FormKey)
+            .ToHashSet();
+
         // Skip non-settlement cells
         if (!cell.IsSettlementCell(param.LinkCache)) return;
 
         foreach (var placedObject in cell.GetAllPlaced(param.LinkCache).OfType<IPlacedObjectGetter>())
         {
-            var isMerchantChest = placedObject.IsMerchantChest(param.LinkCache);
+            // todo: replace with reference cache
+            var isMerchantChest = merchantChests.Contains(placedObject.FormKey);
             var hasLocRefType = placedObject.HasLocationRefType(FormKeys.SkyrimSE.Skyrim.LocationReferenceType.MerchantContainerRefType);
 
             if (isMerchantChest && !hasLocRefType)

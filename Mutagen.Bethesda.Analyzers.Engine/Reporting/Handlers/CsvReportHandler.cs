@@ -12,6 +12,7 @@ public class CsvReportHandler : IReportHandler
 {
     private readonly IWorkDropoff _workDropoff;
     private readonly CsvInputs _inputs;
+    private readonly object _lock = new();
 
     public CsvReportHandler(
         CsvInputs inputs,
@@ -59,7 +60,10 @@ public class CsvReportHandler : IReportHandler
 
     private void Append(string line)
     {
-        using var writer = new StreamWriter(_inputs.OutputFilePath, true);
-        writer.WriteLine(line);
+        lock (_lock)
+        {
+            using var writer = new StreamWriter(_inputs.OutputFilePath, true);
+            writer.WriteLine(line);
+        }
     }
 }

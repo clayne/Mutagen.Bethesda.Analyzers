@@ -5,17 +5,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda.Analyzers.Cli.Args;
 using Mutagen.Bethesda.Analyzers.Cli.Modules;
-using Mutagen.Bethesda.Analyzers.Cli.Overrides;
 using Mutagen.Bethesda.Analyzers.Engines;
-using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Analyzers.Skyrim;
-using Mutagen.Bethesda.Environments.DI;
-using Mutagen.Bethesda.Plugins.Order.DI;
 using Noggog;
 using Noggog.StructuredStrings;
 using Noggog.WorkEngine;
-using IContainer = Autofac.IContainer;
 
 namespace Mutagen.Bethesda.Analyzers.Cli;
 
@@ -66,27 +61,11 @@ public static class RunAnalyzers
 
         var builder = new ContainerBuilder();
         builder.Populate(services);
-        builder.RegisterInstance(new FileSystem())
-            .As<IFileSystem>();
-        builder.RegisterModule(new RunAnalyzerModule(command));
-        builder.RegisterInstance(new GameReleaseInjection(command.GameRelease))
-            .AsImplementedInterfaces();
-        builder.RegisterType<ConsoleReportHandler>().AsImplementedInterfaces();
-        builder.RegisterInstance(command).AsImplementedInterfaces();
-        builder.RegisterInstance(new NumWorkThreadsConstant(command.NumThreads)).AsImplementedInterfaces();
+        builder.RegisterInstance(new FileSystem()).As<IFileSystem>();
 
-        if (command.CustomDataFolder is not null)
-        {
-            var dataDirectoryProvider = new DataDirectoryInjection(command.CustomDataFolder);
-            builder.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
-        }
-
-        if (command.UseDataFolderForLoadOrder)
-        {
-            builder.RegisterType<DataDirectoryEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
-            builder.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
-            builder.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
-        }
+        builder.RegisterModule<RunAnalyzerModule>();
+        builder.RegisterModule(new AnalyzerCommandModule(command));
+        builder.RegisterModule(new AnalyzerConfigModule(command.GameRelease));
 
         builder.RegisterModule<SkyrimAnalyzerModule>();
 

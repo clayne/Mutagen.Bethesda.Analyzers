@@ -18,7 +18,7 @@ public class MapMarkerAnalyzer : IIsolatedRecordAnalyzer<IPlacedObjectGetter>
 
     public static readonly TopicDefinition NoEditorID = MutagenTopicBuilder.DevelopmentTopic(
             "No EditorID",
-            Severity.Silent)
+            Severity.None)
         .WithoutFormatting("Map marker missing editor ID");
 
     public static readonly TopicDefinition NoLinkedReference = MutagenTopicBuilder.DevelopmentTopic(

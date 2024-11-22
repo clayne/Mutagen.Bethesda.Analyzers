@@ -1,5 +1,5 @@
 ﻿using CommandLine;
-using Mutagen.Bethesda.Analyzers.Config;
+using Mutagen.Bethesda.Analyzers.Config.Topic;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 
 namespace Mutagen.Bethesda.Analyzers.Cli.Args;
