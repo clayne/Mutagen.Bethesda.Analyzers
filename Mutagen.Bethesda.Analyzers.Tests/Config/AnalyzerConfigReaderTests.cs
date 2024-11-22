@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda.Analyzers.Config;
 using Mutagen.Bethesda.Analyzers.Config.Analyzer;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
+using Noggog.Testing.IO;
 using NSubstitute;
 using Xunit;
 
@@ -23,17 +24,26 @@ public class AnalyzerConfigReader(
 
 public class AnalyzerConfigReaderTests
 {
-    [Theory]
-    [AnalyzerInlineData("environment.data_directory = C:/some/path")]
-    [AnalyzerInlineData(@"environment.data_directory = C:\some\path")]
-    public void TestDataDirectory(
-        string line,
+    [Theory, AnalyzerAutoData]
+    public void TestDataDirectoryForwardSlash(
         AnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
+        var line = $"environment.data_directory = {PathingUtil.DrivePrefix}some/path";
         sut.Reader.ReadInto(line.AsSpan(), config);
         config.DataDirectoryPath.Should().NotBeNull();
-        config.DataDirectoryPath!.Value.Path.Should().Be(Path.Combine("C:", "some", "path"));
+        config.DataDirectoryPath!.Value.Path.Should().Be(Path.Combine(PathingUtil.DrivePrefix, "some", "path"));
+    }
+
+    [Theory, AnalyzerAutoData]
+    public void TestDataDirectoryBackwardSlash(
+        AnalyzerConfig config,
+        AnalyzerConfigReader sut)
+    {
+        var line = @$"environment.data_directory = {PathingUtil.DrivePrefix}some\path";
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.DataDirectoryPath.Should().NotBeNull();
+        config.DataDirectoryPath!.Value.Path.Should().Be(Path.Combine(PathingUtil.DrivePrefix, "some", "path"));
     }
 
     [Theory]
@@ -72,16 +82,25 @@ public class AnalyzerConfigReaderTests
         config.Received(1).OverrideGameRelease(Arg.Any<GameRelease>());
     }
 
-    [Theory]
-    [AnalyzerInlineData("output_file = C:/some/path")]
-    [AnalyzerInlineData(@"output_file = C:\some\path")]
-    public void TestOutputFilePath(
-        string line,
+    [Theory, AnalyzerAutoData]
+    public void TestOutputFilePathForwardSlash(
         AnalyzerConfig config,
         AnalyzerConfigReader sut)
     {
+        var line = $"output_file = {PathingUtil.DrivePrefix}some/path";
         sut.Reader.ReadInto(line.AsSpan(), config);
         config.OutputFilePath.Should().NotBeNull();
-        config.OutputFilePath!.Value.Path.Should().Be(Path.Combine("C:", "some", "path"));
+        config.OutputFilePath!.Value.Path.Should().Be(Path.Combine(PathingUtil.DrivePrefix, "some", "path"));
+    }
+
+    [Theory, AnalyzerAutoData]
+    public void TestOutputFilePathBackwardSlash(
+        AnalyzerConfig config,
+        AnalyzerConfigReader sut)
+    {
+        var line = $@"output_file = {PathingUtil.DrivePrefix}some\path";
+        sut.Reader.ReadInto(line.AsSpan(), config);
+        config.OutputFilePath.Should().NotBeNull();
+        config.OutputFilePath!.Value.Path.Should().Be(Path.Combine(PathingUtil.DrivePrefix, "some", "path"));
     }
 }
