@@ -13,7 +13,18 @@ public class ConfigDirectoryProvider(
         get
         {
             yield return currentDirectoryProvider.CurrentDirectory;
-            yield return dataDirectoryProvider.Path;
+
+            DirectoryPath? dataDirectory;
+            try
+            {
+                dataDirectory = dataDirectoryProvider.Path;
+            }
+            catch (Exception)
+            {
+                yield break;
+            }
+
+            yield return dataDirectory.Value;
         }
     }
 }
