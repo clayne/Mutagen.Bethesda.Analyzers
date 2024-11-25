@@ -75,7 +75,7 @@ resharper_wrap_parameters_style = wrap_if_long
 # levels: error, warning, suggestion, silent, none, default
 
 # CS1591: // Missing XML comment for publicly visible type or member
-dotnet_diagnostic.CS1591.severity = warning
+dotnet_diagnostic.CS1591.severity = silent
 
 # CS8602: Dereference of a possibly null reference.
 dotnet_diagnostic.CS8602.severity = error
