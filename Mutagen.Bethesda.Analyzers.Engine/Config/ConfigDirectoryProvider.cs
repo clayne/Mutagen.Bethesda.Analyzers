@@ -21,10 +21,13 @@ public class ConfigDirectoryProvider(
             }
             catch (Exception)
             {
-                yield break;
+                dataDirectory = null;
             }
 
-            yield return dataDirectory.Value;
+            if (dataDirectory.HasValue)
+            {
+                yield return dataDirectory.Value;
+            }
         }
     }
 }
