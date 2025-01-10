@@ -1,10 +1,18 @@
-﻿using Autofac;
+﻿using System.IO.Abstractions;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Mutagen.Bethesda.Analyzers.Autofac;
 using Mutagen.Bethesda.Analyzers.Cli.Args;
 using Mutagen.Bethesda.Analyzers.Cli.Overrides;
+using Mutagen.Bethesda.Analyzers.Config;
+using Mutagen.Bethesda.Analyzers.Config.Run;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Order.DI;
+using Noggog;
 using Noggog.WorkEngine;
 
 namespace Mutagen.Bethesda.Analyzers.Cli.Modules;
@@ -16,6 +24,30 @@ public class AnalyzerCommandModule(RunAnalyzersCommand command) : Module
         builder.RegisterInstance(command).AsImplementedInterfaces();
         builder.RegisterInstance(new GameReleaseInjection(command.GameRelease)).AsImplementedInterfaces();
         builder.RegisterInstance(new NumWorkThreadsConstant(command.NumThreads)).AsImplementedInterfaces();
+
+        if (command.RunConfigPath is not null)
+        {
+            var services = new ServiceCollection();
+            services.AddLogging(x => x.AddConsole());
+
+            var tempBuilder = new ContainerBuilder();
+            tempBuilder.Populate(services);
+            var fileSystem = new FileSystem();
+            tempBuilder.RegisterInstance(fileSystem).As<IFileSystem>();
+            tempBuilder.RegisterModule<MainModule>();
+            tempBuilder.RegisterInstance(new GameReleaseInjection(command.GameRelease))
+                .AsImplementedInterfaces();
+
+            var tempContainer = tempBuilder.Build();
+            var runConfigReader = tempContainer.Resolve<ConfigReader<RunConfig>>();
+            var runConfig = new RunConfig();
+            if (fileSystem.Directory.Exists(command.RunConfigPath))
+            {
+                runConfigReader.ReadInto(new FilePath(command.RunConfigPath), runConfig);
+            }
+
+            builder.RegisterModule(new RunConfigModule(runConfig));
+        }
 
         if (command.OutputFilePath is not null)
         {

@@ -16,6 +16,9 @@ public class RunAnalyzersCommand : IMinimumSeverityConfiguration
     [Option('s', "Severity", HelpText = "Minimum severity required in order to report")]
     public Severity MinimumSeverity { get; set; } = Severity.Suggestion;
 
+    [Option("RunConfigPath", HelpText = "Optional path to a run config file")]
+    public string? RunConfigPath { get; set; } = null;
+
     [Option('o', "OutputFilePath", HelpText = "Optional output file path to save the report")]
     public string? OutputFilePath { get; set; } = null;
 
