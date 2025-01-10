@@ -30,4 +30,7 @@ public class RunAnalyzersCommand : IMinimumSeverityConfiguration
 
     [Option('t', "NumThreads", HelpText = "Number of threads to use")]
     public int? NumThreads { get; set; }
+
+    [Option("PrintMetadata", HelpText = "Disable printing metadata")]
+    public bool? PrintMetadata { get; set; }
 }

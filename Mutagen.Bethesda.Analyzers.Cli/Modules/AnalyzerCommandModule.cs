@@ -25,6 +25,7 @@ public class AnalyzerCommandModule(RunAnalyzersCommand command) : Module
         builder.RegisterInstance(new GameReleaseInjection(command.GameRelease)).AsImplementedInterfaces();
         builder.RegisterInstance(new NumWorkThreadsConstant(command.NumThreads)).AsImplementedInterfaces();
 
+        var runConfig = new RunConfig();
         if (command.RunConfigPath is not null)
         {
             var services = new ServiceCollection();
@@ -40,14 +41,14 @@ public class AnalyzerCommandModule(RunAnalyzersCommand command) : Module
 
             var tempContainer = tempBuilder.Build();
             var runConfigReader = tempContainer.Resolve<ConfigReader<IRunConfig>>();
-            var runConfig = new RunConfig();
             if (fileSystem.File.Exists(command.RunConfigPath))
             {
                 runConfigReader.ReadInto(new FilePath(command.RunConfigPath), runConfig);
             }
-
-            builder.RegisterModule(new RunConfigModule(runConfig));
         }
+
+        if (command.PrintMetadata.HasValue) runConfig.PrintMetadata = command.PrintMetadata.Value;
+        builder.RegisterModule(new RunConfigModule(runConfig));
 
         if (command.OutputFilePath is not null)
         {
