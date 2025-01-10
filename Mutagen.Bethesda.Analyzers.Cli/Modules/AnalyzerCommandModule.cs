@@ -39,9 +39,9 @@ public class AnalyzerCommandModule(RunAnalyzersCommand command) : Module
                 .AsImplementedInterfaces();
 
             var tempContainer = tempBuilder.Build();
-            var runConfigReader = tempContainer.Resolve<ConfigReader<RunConfig>>();
+            var runConfigReader = tempContainer.Resolve<ConfigReader<IRunConfig>>();
             var runConfig = new RunConfig();
-            if (fileSystem.Directory.Exists(command.RunConfigPath))
+            if (fileSystem.File.Exists(command.RunConfigPath))
             {
                 runConfigReader.ReadInto(new FilePath(command.RunConfigPath), runConfig);
             }
