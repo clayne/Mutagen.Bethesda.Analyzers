@@ -23,9 +23,9 @@ public class AnalyzerCommandModule(RunAnalyzersCommand command) : Module
             builder.RegisterInstance(new CsvInputs(command.OutputFilePath)).AsSelf().AsImplementedInterfaces();
         }
 
-        if (command.CustomDataFolder is not null)
+        if (command.DataFolder is not null)
         {
-            var dataDirectoryProvider = new DataDirectoryInjection(command.CustomDataFolder);
+            var dataDirectoryProvider = new DataDirectoryInjection(command.DataFolder);
             builder.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
         }
 
