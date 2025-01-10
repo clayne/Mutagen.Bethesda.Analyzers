@@ -22,6 +22,9 @@ public class RunAnalyzersCommand : IMinimumSeverityConfiguration
     [Option("CustomDataFolder", HelpText = "Optional custom data folder to use for the analysis")]
     public string? CustomDataFolder { get; set; } = null;
 
+    [Option("LoadOrder", HelpText = "Optional list of mod file names to set a custom load order, separated by commas")]
+    public string? LoadOrder { get; set; } = null;
+
     [Option('t', "NumThreads", HelpText = "Number of threads to use")]
     public int? NumThreads { get; set; }
 }
