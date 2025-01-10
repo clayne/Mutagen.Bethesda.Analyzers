@@ -1,23 +1,23 @@
 ﻿using Mutagen.Bethesda.Plugins;
 using Noggog;
 
-namespace Mutagen.Bethesda.Analyzers.Config.Analyzer;
+namespace Mutagen.Bethesda.Analyzers.Config.Run;
 
-public interface IAnalyzerConfigLookup
+public interface IRunConfigLookup
 {
     DirectoryPath? DataDirectoryPath { get; }
     IEnumerable<ModKey>? LoadOrderSetToMods { get; }
     FilePath? OutputFilePath { get; }
 }
 
-public interface IAnalyzerConfig : IAnalyzerConfigLookup
+public interface IRunConfig : IRunConfigLookup
 {
     void OverrideDataDirectory(DirectoryPath path);
     void OverrideOutputFilePath(FilePath filePath);
     void OverrideLoadOrderSetToMods(IEnumerable<ModKey> mods);
 }
 
-public class AnalyzerConfig : IAnalyzerConfig
+public class RunConfig : IRunConfig
 {
     public DirectoryPath? DataDirectoryPath { get; private set; }
     public FilePath? OutputFilePath { get; private set; }

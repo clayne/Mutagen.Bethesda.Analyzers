@@ -5,40 +5,40 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda.Analyzers.Autofac;
 using Mutagen.Bethesda.Analyzers.Cli.Overrides;
-using Mutagen.Bethesda.Analyzers.Config.Analyzer;
+using Mutagen.Bethesda.Analyzers.Config.Run;
 using Mutagen.Bethesda.Analyzers.Reporting.Handlers;
 using Mutagen.Bethesda.Environments.DI;
 using Mutagen.Bethesda.Plugins.Order.DI;
 
 namespace Mutagen.Bethesda.Analyzers.Cli.Modules;
 
-public class AnalyzerConfigModule(GameRelease gameRelease) : Module
+public class RunConfigModule(GameRelease gameRelease) : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
-        var analyzerConfig = GetAnalyzerConfig();
+        var runConfig = GetRunConfig();
 
-        if (analyzerConfig.DataDirectoryPath.HasValue)
+        if (runConfig.DataDirectoryPath.HasValue)
         {
-            var dataDirectoryProvider = new DataDirectoryInjection(analyzerConfig.DataDirectoryPath.Value);
+            var dataDirectoryProvider = new DataDirectoryInjection(runConfig.DataDirectoryPath.Value);
             builder.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
         }
 
-        if (analyzerConfig.LoadOrderSetToMods is not null)
+        if (runConfig.LoadOrderSetToMods is not null)
         {
-            builder.RegisterInstance(new InjectedEnabledPluginListingsProvider(analyzerConfig.LoadOrderSetToMods)).As<IEnabledPluginListingsProvider>();
+            builder.RegisterInstance(new InjectedEnabledPluginListingsProvider(runConfig.LoadOrderSetToMods)).As<IEnabledPluginListingsProvider>();
             builder.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
             builder.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
         }
 
-        if (analyzerConfig.OutputFilePath is not null)
+        if (runConfig.OutputFilePath is not null)
         {
             builder.RegisterType<CsvReportHandler>().AsImplementedInterfaces().SingleInstance();
-            builder.RegisterInstance(new CsvInputs(analyzerConfig.OutputFilePath)).AsSelf().AsImplementedInterfaces();
+            builder.RegisterInstance(new CsvInputs(runConfig.OutputFilePath)).AsSelf().AsImplementedInterfaces();
         }
     }
 
-    private IAnalyzerConfigLookup GetAnalyzerConfig()
+    private IRunConfigLookup GetRunConfig()
     {
         var services = new ServiceCollection();
         services.AddLogging(x => x.AddConsole());
@@ -52,7 +52,7 @@ public class AnalyzerConfigModule(GameRelease gameRelease) : Module
 
         var container = builder.Build();
 
-        var analyzerConfigProvider = container.Resolve<AnalyzerConfigProvider>();
-        return analyzerConfigProvider.Config;
+        var runConfigProvider = container.Resolve<RunConfigProvider>();
+        return runConfigProvider.Config;
     }
 }

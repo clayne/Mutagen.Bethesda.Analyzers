@@ -65,7 +65,7 @@ public static class RunAnalyzers
 
         builder.RegisterModule<RunAnalyzerModule>();
         builder.RegisterModule(new AnalyzerCommandModule(command));
-        builder.RegisterModule(new AnalyzerConfigModule(command.GameRelease));
+        builder.RegisterModule(new RunConfigModule(command.GameRelease));
 
         builder.RegisterModule<SkyrimAnalyzerModule>();
 

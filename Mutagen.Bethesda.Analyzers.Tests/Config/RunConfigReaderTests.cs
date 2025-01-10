@@ -2,7 +2,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Mutagen.Bethesda.Analyzers.Config;
-using Mutagen.Bethesda.Analyzers.Config.Analyzer;
+using Mutagen.Bethesda.Analyzers.Config.Run;
 using Mutagen.Bethesda.FormKeys.SkyrimSE;
 using Noggog.Testing.IO;
 using NSubstitute;
@@ -11,21 +11,21 @@ using Xunit;
 namespace Mutagen.Bethesda.Analyzers.Tests.Config;
 
 [method: SuppressMessage("ReSharper", "ContextualLoggerProblem", Justification = "Passed in")]
-public class AnalyzerConfigReader(
-    ILogger<ConfigReader<IAnalyzerConfig>> logger,
+public class RunConfigReader(
+    ILogger<ConfigReader<IRunConfig>> logger,
     ProcessDataDirectoryPath p1,
     ProcessLoadOrderSetToMods p2,
     ProcessOutputFilePath p3)
 {
-    public readonly ConfigReader<IAnalyzerConfig> Reader = new(logger, [p1, p2, p3]);
+    public readonly ConfigReader<IRunConfig> Reader = new(logger, [p1, p2, p3]);
 }
 
-public class AnalyzerConfigReaderTests
+public class RunConfigReaderTests
 {
     [Theory, AnalyzerAutoData]
     public void TestDataDirectoryForwardSlash(
-        AnalyzerConfig config,
-        AnalyzerConfigReader sut)
+        RunConfig config,
+        RunConfigReader sut)
     {
         var line = $"environment.data_directory = {PathingUtil.DrivePrefix}some/path";
         sut.Reader.ReadInto(line.AsSpan(), config);
@@ -35,8 +35,8 @@ public class AnalyzerConfigReaderTests
 
     [Theory, AnalyzerAutoData]
     public void TestDataDirectoryBackwardSlash(
-        AnalyzerConfig config,
-        AnalyzerConfigReader sut)
+        RunConfig config,
+        RunConfigReader sut)
     {
         var line = @$"environment.data_directory = {PathingUtil.DrivePrefix}some\path";
         sut.Reader.ReadInto(line.AsSpan(), config);
@@ -48,8 +48,8 @@ public class AnalyzerConfigReaderTests
     [AnalyzerInlineData("environment.load_order.set_to_mods = Skyrim.esm, Update.esm")]
     public void TestSetToMods(
         string line,
-        AnalyzerConfig config,
-        AnalyzerConfigReader sut)
+        RunConfig config,
+        RunConfigReader sut)
     {
         sut.Reader.ReadInto(line.AsSpan(), config);
         config.LoadOrderSetToMods.Should().BeEquivalentTo([FormKeys.SkyrimSE.Skyrim.ModKey, Update.ModKey]);
@@ -57,8 +57,8 @@ public class AnalyzerConfigReaderTests
 
     [Theory, AnalyzerAutoData]
     public void TestOutputFilePathForwardSlash(
-        AnalyzerConfig config,
-        AnalyzerConfigReader sut)
+        RunConfig config,
+        RunConfigReader sut)
     {
         var line = $"output_file = {PathingUtil.DrivePrefix}some/path";
         sut.Reader.ReadInto(line.AsSpan(), config);
@@ -68,8 +68,8 @@ public class AnalyzerConfigReaderTests
 
     [Theory, AnalyzerAutoData]
     public void TestOutputFilePathBackwardSlash(
-        AnalyzerConfig config,
-        AnalyzerConfigReader sut)
+        RunConfig config,
+        RunConfigReader sut)
     {
         var line = $@"output_file = {PathingUtil.DrivePrefix}some\path";
         sut.Reader.ReadInto(line.AsSpan(), config);
