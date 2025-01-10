@@ -34,6 +34,7 @@ public class ByGenericTypeRecordFrameIsolatedDriver<TMajor> : IIsolatedRecordFra
         var reportContext = new ReportContextParameters(driverParams.LinkCache);
         var param = new IsolatedRecordFrameAnalyzerParams<TMajor>(
             driverParams.ReportDropbox,
+            driverParams.TargetMod,
             reportContext,
             frame);
 

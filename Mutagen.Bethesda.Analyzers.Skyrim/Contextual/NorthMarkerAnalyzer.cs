@@ -29,14 +29,21 @@ public class NorthMarkerAnalyzer : IContextualAnalyzer
                 .Where(placed => placed.Base.FormKey == FormKeys.SkyrimSE.Skyrim.Static.NorthMarker.FormKey)
                 .ToArray();
 
+            var context = param.LinkCache.ResolveSimpleContext(cell);
             if (northMarkers.Length == 0)
             {
-                param.AddTopic(NoNorthMarker.Format());
+                param.AddTopic(
+                    context.ModKey,
+                    cell,
+                    NoNorthMarker.Format());
             }
 
             if (northMarkers.Length > 1)
             {
-                param.AddTopic(MoreThanOneNorthMarker.Format(northMarkers));
+                param.AddTopic(
+                    context.ModKey,
+                    cell,
+                    MoreThanOneNorthMarker.Format(northMarkers));
             }
         }
     }

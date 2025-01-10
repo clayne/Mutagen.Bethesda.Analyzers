@@ -36,7 +36,10 @@ public class ConflictingVoiceTypesAnalyzer : IContextualAnalyzer
                 var count = npcs.Count;
                 if (count <= 1) continue;
 
+                var cellContext = param.LinkCache.ResolveSimpleContext(cell);
                 param.AddTopic(
+                    cellContext.ModKey,
+                    cell,
                     NpcsWithSameVoiceType.Format(cell, count, grouping.Key),
                     ("NPCs", npcs));
             }
