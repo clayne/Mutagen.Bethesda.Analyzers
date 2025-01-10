@@ -23,9 +23,11 @@ public class ConsoleReportHandler : IReportHandler
     {
         _workDropoff.Enqueue(() =>
         {
-            Console.WriteLine($"{topic.TopicDefinition}");
-            Console.WriteLine($"   {sourceMod.ToString()} -> {majorRecord.FormKey.ToString()} {majorRecord.EditorID}");
-            Console.WriteLine($"   {topic.FormattedTopic.FormattedMessage}");
+            Console.WriteLine($"""
+                {topic.TopicDefinition}
+                   {sourceMod.ToString()} -> {majorRecord.FormKey.ToString()} {majorRecord.EditorID}
+                   {topic.FormattedTopic.FormattedMessage}
+                """);
 
             PrintMetadata(topic);
         });
@@ -37,8 +39,10 @@ public class ConsoleReportHandler : IReportHandler
     {
         _workDropoff.Enqueue(() =>
         {
-            Console.WriteLine($"{topic.TopicDefinition}");
-            Console.WriteLine($"   {topic.FormattedTopic.FormattedMessage}");
+            Console.WriteLine($"""
+                {topic.TopicDefinition}
+                   {topic.FormattedTopic.FormattedMessage}
+                """);
         });
     }
 
