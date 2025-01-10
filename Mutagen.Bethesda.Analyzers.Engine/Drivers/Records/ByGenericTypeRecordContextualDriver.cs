@@ -15,10 +15,10 @@ public class ByGenericTypeRecordContextualDriver<TMajor> : IContextualDriver
     public IEnumerable<IAnalyzer> Analyzers => _contextualRecordAnalyzers;
 
     public ByGenericTypeRecordContextualDriver(
-        IContextualRecordAnalyzer<TMajor>[] contextualRecordAnalyzers,
+        IAnalyzerProvider<IContextualRecordAnalyzer<TMajor>> contextualRecordAnalyzerProvider,
         IWorkDropoff dropoff)
     {
-        _contextualRecordAnalyzers = contextualRecordAnalyzers;
+        _contextualRecordAnalyzers = contextualRecordAnalyzerProvider.GetAnalyzers().ToArray();
         _dropoff = dropoff;
     }
 

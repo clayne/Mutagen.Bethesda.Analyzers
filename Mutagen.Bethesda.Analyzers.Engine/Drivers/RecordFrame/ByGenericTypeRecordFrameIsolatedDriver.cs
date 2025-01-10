@@ -21,10 +21,10 @@ public class ByGenericTypeRecordFrameIsolatedDriver<TMajor> : IIsolatedRecordFra
     public RecordType TargetType => MajorRecordTypeLookup<TMajor>.RecordType;
 
     public ByGenericTypeRecordFrameIsolatedDriver(
-        IIsolatedRecordFrameAnalyzer<TMajor>[] isolatedRecordFrameAnalyzers,
+        IAnalyzerProvider<IIsolatedRecordFrameAnalyzer<TMajor>> isolatedRecordFrameAnalyzerProvider,
         IWorkDropoff dropoff)
     {
-        _isolatedRecordFrameAnalyzers = isolatedRecordFrameAnalyzers;
+        _isolatedRecordFrameAnalyzers = isolatedRecordFrameAnalyzerProvider.GetAnalyzers().ToArray();
         _dropoff = dropoff;
     }
 
