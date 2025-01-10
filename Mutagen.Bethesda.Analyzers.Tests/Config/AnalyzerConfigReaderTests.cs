@@ -14,11 +14,10 @@ namespace Mutagen.Bethesda.Analyzers.Tests.Config;
 public class AnalyzerConfigReader(
     ILogger<ConfigReader<IAnalyzerConfig>> logger,
     ProcessDataDirectoryPath p1,
-    ProcessLoadOrderSetByDataDirectory p2,
-    ProcessLoadOrderSetToMods p3,
-    ProcessOutputFilePath p4)
+    ProcessLoadOrderSetToMods p2,
+    ProcessOutputFilePath p3)
 {
-    public readonly ConfigReader<IAnalyzerConfig> Reader = new(logger, [p1, p2, p2, p3, p4]);
+    public readonly ConfigReader<IAnalyzerConfig> Reader = new(logger, [p1, p2, p3]);
 }
 
 public class AnalyzerConfigReaderTests
@@ -43,18 +42,6 @@ public class AnalyzerConfigReaderTests
         sut.Reader.ReadInto(line.AsSpan(), config);
         config.DataDirectoryPath.Should().NotBeNull();
         config.DataDirectoryPath!.Value.Path.Should().Be(Path.Combine(PathingUtil.DrivePrefix, "some", "path"));
-    }
-
-    [Theory]
-    [AnalyzerInlineData("environment.load_order.set_by_data_directory = true")]
-    [AnalyzerInlineData("environment.load_order.set_by_data_directory = false")]
-    public void TestSetByDataDirectory(
-        string line,
-        IAnalyzerConfig config,
-        AnalyzerConfigReader sut)
-    {
-        sut.Reader.ReadInto(line.AsSpan(), config);
-        config.Received(1).OverrideLoadOrderSetByDataDirectory(Arg.Any<bool>());
     }
 
     [Theory]

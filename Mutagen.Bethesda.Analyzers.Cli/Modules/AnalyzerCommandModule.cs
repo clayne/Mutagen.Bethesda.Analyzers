@@ -27,12 +27,5 @@ public class AnalyzerCommandModule(RunAnalyzersCommand command) : Module
             var dataDirectoryProvider = new DataDirectoryInjection(command.CustomDataFolder);
             builder.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
         }
-
-        if (command.UseDataFolderForLoadOrder)
-        {
-            builder.RegisterType<DataDirectoryEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
-            builder.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
-            builder.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
-        }
     }
 }

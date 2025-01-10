@@ -24,13 +24,7 @@ public class AnalyzerConfigModule(GameRelease gameRelease) : Module
             builder.RegisterInstance(dataDirectoryProvider).As<IDataDirectoryProvider>();
         }
 
-        if (analyzerConfig.LoadOrderSetByDataDirectory)
-        {
-            builder.RegisterType<DataDirectoryEnabledPluginListingsProvider>().As<IEnabledPluginListingsProvider>();
-            builder.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
-            builder.RegisterType<NullCreationClubListingsPathProvider>().As<ICreationClubListingsPathProvider>();
-        }
-        else if (analyzerConfig.LoadOrderSetToMods is not null)
+        if (analyzerConfig.LoadOrderSetToMods is not null)
         {
             builder.RegisterInstance(new InjectedEnabledPluginListingsProvider(analyzerConfig.LoadOrderSetToMods)).As<IEnabledPluginListingsProvider>();
             builder.RegisterType<NullPluginListingsPathProvider>().As<IPluginListingsPathProvider>();
