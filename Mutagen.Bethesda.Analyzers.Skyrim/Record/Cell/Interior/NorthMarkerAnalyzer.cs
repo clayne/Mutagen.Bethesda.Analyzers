@@ -2,7 +2,7 @@
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Skyrim;
 
-namespace Mutagen.Bethesda.Analyzers.Skyrim.Contextual;
+namespace Mutagen.Bethesda.Analyzers.Skyrim.Record.Cell.Interior;
 
 public class NorthMarkerAnalyzer : IContextualRecordAnalyzer<ICellGetter>
 {
