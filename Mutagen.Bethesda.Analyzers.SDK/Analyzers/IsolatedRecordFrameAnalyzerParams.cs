@@ -1,10 +1,7 @@
 ﻿using Mutagen.Bethesda.Analyzers.SDK.Drops;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
-using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Headers;
-using Mutagen.Bethesda.Plugins.Meta;
 using Mutagen.Bethesda.Plugins.Records;
-using Mutagen.Bethesda.Plugins.Records.Internals;
 
 namespace Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 
@@ -17,17 +14,20 @@ public readonly struct IsolatedRecordFrameAnalyzerParams<TMajor>
     public Type? AnalyzerType { get; init; }
     private readonly IReportDropbox _reportDropbox;
     private readonly IModGetter _mod;
+    private readonly IMajorRecordIdentifierGetter _record;
     private readonly ReportContextParameters _parameters;
 
     public readonly MajorRecordFrame Frame;
 
     internal IsolatedRecordFrameAnalyzerParams(IReportDropbox reportDropbox,
         IModGetter mod,
+        IMajorRecordIdentifierGetter record,
         ReportContextParameters parameters,
         MajorRecordFrame frame)
     {
         _reportDropbox = reportDropbox;
         _mod = mod;
+        _record = record;
         _parameters = parameters;
         Frame = frame;
     }
@@ -39,20 +39,10 @@ public readonly struct IsolatedRecordFrameAnalyzerParams<TMajor>
         IFormattedTopicDefinition formattedTopicDefinition,
         params (string Name, object Value)[] metaData)
     {
-        string? editorId = null;
-        if (Frame.TryFindSubrecord(RecordTypes.EDID, out var edid))
-        {
-            editorId = edid.AsString(GameConstants.Get(_mod.GameRelease).Encodings.NonLocalized);
-        }
-
         _reportDropbox.Dropoff(
             _parameters,
             _mod.ModKey,
-            new MajorRecordIdentifier
-            {
-                FormKey = new FormKey(_mod.ModKey, Frame.FormID.Id(_mod.MasterStyle)),
-                EditorID = editorId,
-            },
+            _record,
             Topic.Create(formattedTopicDefinition, AnalyzerType, metaData));
     }
 }
@@ -64,6 +54,7 @@ public readonly struct IsolatedRecordFrameAnalyzerParams
 {
     private readonly IReportDropbox _reportDropbox;
     private readonly IModGetter _mod;
+    private readonly IMajorRecordIdentifierGetter _record;
     private readonly ReportContextParameters _parameters;
     public readonly Type AnalyzerType;
 
@@ -71,6 +62,7 @@ public readonly struct IsolatedRecordFrameAnalyzerParams
 
     internal IsolatedRecordFrameAnalyzerParams(
         IModGetter mod,
+        IMajorRecordIdentifierGetter record,
         IReportDropbox reportDropbox,
         ReportContextParameters parameters,
         MajorRecordFrame frame,
@@ -78,6 +70,7 @@ public readonly struct IsolatedRecordFrameAnalyzerParams
     {
         AnalyzerType = analyzerType;
         _mod = mod;
+        _record = record;
         _reportDropbox = reportDropbox;
         _parameters = parameters;
         Frame = frame;
@@ -90,20 +83,10 @@ public readonly struct IsolatedRecordFrameAnalyzerParams
         IFormattedTopicDefinition formattedTopicDefinition,
         params (string Name, object Value)[] metaData)
     {
-        string? editorId = null;
-        if (Frame.TryFindSubrecord(RecordTypes.EDID, out var edid))
-        {
-            editorId = edid.AsString(GameConstants.Get(_mod.GameRelease).Encodings.NonLocalized);
-        }
-
         _reportDropbox.Dropoff(
             _parameters,
             _mod.ModKey,
-            new MajorRecordIdentifier
-            {
-                FormKey = new FormKey(_mod.ModKey, Frame.FormID.Id(_mod.MasterStyle)),
-                EditorID = editorId,
-            },
+            _record,
             Topic.Create(formattedTopicDefinition, AnalyzerType, metaData));
     }
 }
