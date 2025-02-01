@@ -23,7 +23,7 @@ public class CircularLeveledSpellListAnalyzer : IContextualRecordAnalyzer<ILevel
             {
                 return l.Entries
                     .Select(x => x.Data)
-                    .NotNull()
+                    .WhereNotNull()
                     .Select(x => x.Reference.FormKey);
             }
 

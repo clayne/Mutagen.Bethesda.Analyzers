@@ -36,7 +36,7 @@ public class TooLongAnalyzer : IIsolatedRecordAnalyzer<IDialogResponsesGetter>
         // Check responses
         foreach (var response in dialogResponses.Responses
                      .Select(x => x.Text.String)
-                     .NotNull()
+                     .WhereNotNull()
                      .Where(text => text is { Length: > DialogResponseLengthLimit }))
         {
             param.AddTopic(

@@ -31,7 +31,7 @@ public class TrainerAnalyzer : IContextualRecordAnalyzer<INpcGetter>
 
         var faction = npc.Factions
             .Select(x => x.Faction.TryResolve(param.LinkCache))
-            .NotNull()
+            .WhereNotNull()
             .ToList();
 
         var hasTrainerGoldScript = npc.VirtualMachineAdapter is not null && npc.HasScript("TrainerGoldScript");

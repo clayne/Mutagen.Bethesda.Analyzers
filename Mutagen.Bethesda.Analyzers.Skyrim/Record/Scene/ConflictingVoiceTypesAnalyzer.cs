@@ -23,9 +23,9 @@ public class ConflictingVoiceTypesAnalyzer : IContextualRecordAnalyzer<ISceneGet
 
         var npcVoiceTypes = scene.Actors
             .Select(a => quest.Aliases.FirstOrDefault(x => x.ID == a.ID))
-            .NotNull()
+            .WhereNotNull()
             .Select(a => a.UniqueActor.TryResolve(param.LinkCache))
-            .NotNull()
+            .WhereNotNull()
             .GroupBy(x => x.Voice);
 
         foreach (var npcVoiceType in npcVoiceTypes)

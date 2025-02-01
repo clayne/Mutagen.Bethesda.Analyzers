@@ -42,7 +42,7 @@ public class FootstepAnalyzer : IContextualRecordAnalyzer<IArmorGetter>
 
         var armorAddons = armor.Armature
             .Select(armorAddonLink => armorAddonLink.TryResolve(param.LinkCache))
-            .NotNull()
+            .WhereNotNull()
             .ToList();
 
         // Check duplicate footsteps

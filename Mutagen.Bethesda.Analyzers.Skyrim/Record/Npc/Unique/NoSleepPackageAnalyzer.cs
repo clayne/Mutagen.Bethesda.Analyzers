@@ -27,7 +27,7 @@ public class NoSleepPackageAnalyzer : IContextualRecordAnalyzer<INpcGetter>
 
         var hasSleepPackage = npc.Packages
             .Select(p => p.TryResolve(param.LinkCache))
-            .NotNull()
+            .WhereNotNull()
             .Any(HasSleepProcedure);
 
         if (!hasSleepPackage)

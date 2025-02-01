@@ -64,7 +64,7 @@ public class RecordFrameDriver : IIsolatedDriver, IContextualDriver
         if (driverParams.CancellationToken.IsCancellationRequested) return;
         await Task.WhenAll(driverParams.LoadOrder.ListedOrder
             .Select(x => x.Mod)
-            .NotNull()
+            .WhereNotNull()
             .Select(async mod =>
             {
                 if (driverParams.CancellationToken.IsCancellationRequested) return;

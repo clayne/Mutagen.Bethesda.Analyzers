@@ -32,7 +32,7 @@ public class NotTrimmedAnalyzer : IIsolatedRecordAnalyzer<IDialogResponsesGetter
 
         // Check responses
         foreach (var response in dialogResponses.Responses.Select(dialogResponse => dialogResponse.Text.String)
-                     .NotNull()
+                     .WhereNotNull()
                      .Where(text => !text.IsNullOrWhitespace())
                      .Where(NotTrimmed)
                 )

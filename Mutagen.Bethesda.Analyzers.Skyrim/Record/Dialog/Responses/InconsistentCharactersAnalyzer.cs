@@ -34,7 +34,7 @@ public class InconsistentCharactersAnalyzer : IIsolatedRecordAnalyzer<IDialogRes
         // Check responses
         foreach (var response in dialogResponses.Responses
                      .Select(x => x.Text.String)
-                     .NotNull())
+                     .WhereNotNull())
         {
             CheckInconsistentCharacters(response, ResponseInconsistentCharacters);
 
