@@ -13,16 +13,21 @@ public readonly struct IsolatedRecordFrameAnalyzerParams<TMajor>
 {
     public Type? AnalyzerType { get; init; }
     private readonly IReportDropbox _reportDropbox;
+    private readonly IModGetter _mod;
+    private readonly IMajorRecordIdentifierGetter _record;
     private readonly ReportContextParameters _parameters;
 
     public readonly MajorRecordFrame Frame;
 
-    internal IsolatedRecordFrameAnalyzerParams(
-        IReportDropbox reportDropbox,
+    internal IsolatedRecordFrameAnalyzerParams(IReportDropbox reportDropbox,
+        IModGetter mod,
+        IMajorRecordIdentifierGetter record,
         ReportContextParameters parameters,
         MajorRecordFrame frame)
     {
         _reportDropbox = reportDropbox;
+        _mod = mod;
+        _record = record;
         _parameters = parameters;
         Frame = frame;
     }
@@ -36,6 +41,8 @@ public readonly struct IsolatedRecordFrameAnalyzerParams<TMajor>
     {
         _reportDropbox.Dropoff(
             _parameters,
+            _mod.ModKey,
+            _record,
             Topic.Create(formattedTopicDefinition, AnalyzerType, metaData));
     }
 }
@@ -46,18 +53,24 @@ public readonly struct IsolatedRecordFrameAnalyzerParams<TMajor>
 public readonly struct IsolatedRecordFrameAnalyzerParams
 {
     private readonly IReportDropbox _reportDropbox;
+    private readonly IModGetter _mod;
+    private readonly IMajorRecordIdentifierGetter _record;
     private readonly ReportContextParameters _parameters;
     public readonly Type AnalyzerType;
 
     public readonly MajorRecordFrame Frame;
 
     internal IsolatedRecordFrameAnalyzerParams(
+        IModGetter mod,
+        IMajorRecordIdentifierGetter record,
         IReportDropbox reportDropbox,
         ReportContextParameters parameters,
         MajorRecordFrame frame,
         Type analyzerType)
     {
         AnalyzerType = analyzerType;
+        _mod = mod;
+        _record = record;
         _reportDropbox = reportDropbox;
         _parameters = parameters;
         Frame = frame;
@@ -72,6 +85,8 @@ public readonly struct IsolatedRecordFrameAnalyzerParams
     {
         _reportDropbox.Dropoff(
             _parameters,
+            _mod.ModKey,
+            _record,
             Topic.Create(formattedTopicDefinition, AnalyzerType, metaData));
     }
 }

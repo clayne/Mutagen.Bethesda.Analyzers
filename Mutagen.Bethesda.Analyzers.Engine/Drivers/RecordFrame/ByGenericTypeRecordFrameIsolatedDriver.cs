@@ -2,9 +2,11 @@
 using Mutagen.Bethesda.Analyzers.SDK.Drops;
 using Mutagen.Bethesda.Plugins;
 using Mutagen.Bethesda.Plugins.Binary.Headers;
+using Mutagen.Bethesda.Plugins.Meta;
 using Mutagen.Bethesda.Plugins.Records;
 using Mutagen.Bethesda.Plugins.Records.Mapping;
 using Noggog.WorkEngine;
+using RecordTypes = Mutagen.Bethesda.Plugins.Records.Internals.RecordTypes;
 
 namespace Mutagen.Bethesda.Analyzers.Drivers.RecordFrame;
 
@@ -21,19 +23,33 @@ public class ByGenericTypeRecordFrameIsolatedDriver<TMajor> : IIsolatedRecordFra
     public RecordType TargetType => MajorRecordTypeLookup<TMajor>.RecordType;
 
     public ByGenericTypeRecordFrameIsolatedDriver(
-        IIsolatedRecordFrameAnalyzer<TMajor>[] isolatedRecordFrameAnalyzers,
+        IAnalyzerProvider<IIsolatedRecordFrameAnalyzer<TMajor>> isolatedRecordFrameAnalyzerProvider,
         IWorkDropoff dropoff)
     {
-        _isolatedRecordFrameAnalyzers = isolatedRecordFrameAnalyzers;
+        _isolatedRecordFrameAnalyzers = isolatedRecordFrameAnalyzerProvider.GetAnalyzers().ToArray();
         _dropoff = dropoff;
     }
 
     public async Task Drive(IsolatedDriverParams driverParams, MajorRecordFrame frame)
     {
         if (driverParams.CancellationToken.IsCancellationRequested) return;
+
+        string? editorId = null;
+        if (frame.TryFindSubrecord(RecordTypes.EDID, out var edid))
+        {
+            editorId = edid.AsString(GameConstants.Get(driverParams.TargetMod.GameRelease).Encodings.NonLocalized);
+        }
+        var formKey = new FormKey(driverParams.TargetMod.ModKey, frame.FormID.Id(driverParams.TargetMod.MasterStyle));
+
         var reportContext = new ReportContextParameters(driverParams.LinkCache);
         var param = new IsolatedRecordFrameAnalyzerParams<TMajor>(
             driverParams.ReportDropbox,
+            driverParams.TargetMod,
+            new MajorRecordIdentifier
+            {
+                FormKey = formKey,
+                EditorID = editorId,
+            },
             reportContext,
             frame);
 

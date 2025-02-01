@@ -1,10 +1,11 @@
 using Mutagen.Bethesda.Analyzers.SDK.Analyzers;
 using Mutagen.Bethesda.Analyzers.SDK.Topics;
 using Mutagen.Bethesda.Skyrim;
+using Noggog;
 
 namespace Mutagen.Bethesda.Analyzers.Skyrim.Record.Placed.Object;
 
-public class MapMarkerAnalyzer : IIsolatedRecordAnalyzer<IPlacedObjectGetter>
+public class MapMarkerAnalyzer : IContextualRecordAnalyzer<IPlacedObjectGetter>
 {
     public static readonly TopicDefinition NoMenuDisplayObject = MutagenTopicBuilder.DevelopmentTopic(
             "Not Persistent",
@@ -28,7 +29,7 @@ public class MapMarkerAnalyzer : IIsolatedRecordAnalyzer<IPlacedObjectGetter>
 
     public IEnumerable<TopicDefinition> Topics { get; } = [NoMenuDisplayObject, NoLocRefType, NoEditorID, NoLinkedReference];
 
-    public void AnalyzeRecord(IsolatedRecordAnalyzerParams<IPlacedObjectGetter> param)
+    public void AnalyzeRecord(ContextualRecordAnalyzerParams<IPlacedObjectGetter> param)
     {
         var placedObject = param.Record;
 
@@ -56,7 +57,10 @@ public class MapMarkerAnalyzer : IIsolatedRecordAnalyzer<IPlacedObjectGetter>
         }
 
         // No Linked Reference
-        if (placedObject.LinkedReferences.All(link => link.Reference.FormKey != FormKeys.SkyrimSE.Skyrim.Static.XMarkerHeading.FormKey))
+        if (placedObject.LinkedReferences
+            .Select(link => link.Reference.TryResolve<IPlacedObjectGetter>(param.LinkCache))
+            .WhereNotNull()
+            .All(link => link.Base.FormKey != FormKeys.SkyrimSE.Skyrim.Static.XMarkerHeading.FormKey))
         {
             param.AddTopic(
                 NoLinkedReference.Format());

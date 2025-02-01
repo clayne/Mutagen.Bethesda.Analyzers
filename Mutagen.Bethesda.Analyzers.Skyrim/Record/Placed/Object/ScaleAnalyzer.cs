@@ -7,15 +7,15 @@ namespace Mutagen.Bethesda.Analyzers.Skyrim.Record.Placed.Object;
 
 public class ScaleAnalyzer : IContextualRecordAnalyzer<IPlacedObjectGetter>
 {
-    public static readonly TopicDefinition<float> ScaleTooSmall = MutagenTopicBuilder.DevelopmentTopic(
+    public static readonly TopicDefinition<string, float> ScaleTooSmall = MutagenTopicBuilder.DevelopmentTopic(
             "Scale Too Small",
             Severity.Warning)
-        .WithFormatting<float>("The object with scale {0} is too small");
+        .WithFormatting<string, float>("A {0} placement with scale {1} is too small");
 
-    public static readonly TopicDefinition<float> ScaleTooLarge = MutagenTopicBuilder.DevelopmentTopic(
+    public static readonly TopicDefinition<string, float> ScaleTooLarge = MutagenTopicBuilder.DevelopmentTopic(
             "Scale Too Large",
             Severity.Warning)
-        .WithFormatting<float>("The object with scale {0} is too large");
+        .WithFormatting<string, float>("A {0} placement with scale {1} is too large");
 
     public IEnumerable<TopicDefinition> Topics { get; } = [ScaleTooSmall, ScaleTooLarge];
 
@@ -35,14 +35,16 @@ public class ScaleAnalyzer : IContextualRecordAnalyzer<IPlacedObjectGetter>
 
         var scale = scaleNullable.Value;
 
-        // Scale that is always allowed
-        if (scale is >= 0.5f and <= 1.5f) return;
+        // Scale 1 is always allowed
+        if (Math.Abs(1 - scale) < float.Epsilon) return;
 
         // Allowed objects
         if (AllowedScaledObjects.Contains(placedObject.Base.FormKey)) return;
 
         var baseObject = placedObject.Base.TryResolve(param.LinkCache);
-        var baseObjectEditorID = baseObject?.EditorID;
+        if (baseObject is null) return;
+
+        var baseObjectEditorID = baseObject.EditorID;
         if (baseObjectEditorID is null) return;
 
         // Allowed editor ids
@@ -58,19 +60,22 @@ public class ScaleAnalyzer : IContextualRecordAnalyzer<IPlacedObjectGetter>
         // Specific type filter
         switch (baseObject)
         {
+            case IMiscItemGetter:
+                // Misc items should never be scaled
+                // They can be picked up and dropped which resets the scale to 1
+                // A value other than 1 would be lost and create inconsistencies
+                break;
             case IActivatorGetter:
-                break;
             case IContainerGetter:
-                break;
             case IDoorGetter:
+            case IFurnitureGetter:
+            case IIngestibleGetter:
+                if (scale is >= 0.5f and <= 1.5f) return;
+
                 break;
             case IFloraGetter:
                 if (scale is >= 0.1f and <= 3f) return;
 
-                break;
-            case IFurnitureGetter:
-                break;
-            case IIngestibleGetter:
                 break;
             case IMoveableStaticGetter:
                 if (scale is >= 0.2f and <= 3f) return;
@@ -84,7 +89,7 @@ public class ScaleAnalyzer : IContextualRecordAnalyzer<IPlacedObjectGetter>
                 if (scale is >= 0.1f and <= 3f) return;
 
                 break;
-            // Ignored types
+            // Ignored types - never report
             case ILightGetter:
             case IIdleMarkerGetter:
             case ITextureSetGetter:
@@ -94,7 +99,7 @@ public class ScaleAnalyzer : IContextualRecordAnalyzer<IPlacedObjectGetter>
         }
 
         param.AddTopic(
-            (scale < 1 ? ScaleTooSmall : ScaleTooLarge).Format(scale));
+            (scale < 1 ? ScaleTooSmall : ScaleTooLarge).Format(baseObject.Registration.Name, scale));
     }
 
     public IEnumerable<Func<IPlacedObjectGetter, object?>> FieldsOfInterest()
