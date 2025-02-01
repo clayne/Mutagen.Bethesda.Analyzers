@@ -7,7 +7,7 @@ using Mutagen.Bethesda.Plugins.Order.DI;
 
 namespace Mutagen.Bethesda.Analyzers.Cli.Modules;
 
-public class RunConfigModule(RunConfig runConfig) : Module
+public class RunConfigModule(IRunConfigLookup runConfig) : Module
 {
     protected override void Load(ContainerBuilder builder)
     {
